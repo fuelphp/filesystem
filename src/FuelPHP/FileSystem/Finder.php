@@ -211,7 +211,7 @@ class Finder
 	 * @param   boolean       $reversed  wether the search was reversed
 	 * @return  string|array  cached result
 	 */
-    public function findCached($scope, $file, $reversed)
+	public function findCached($scope, $file, $reversed)
 	{
 		$cacheKey = $this->makeCacheKey($scope, $file, $reversed);
 
