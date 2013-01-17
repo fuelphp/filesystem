@@ -57,6 +57,30 @@ class Finder
 	}
 
 	/**
+	 * Get all the paths
+	 *
+	 * @return   array  paths
+	 */
+	public function getPaths()
+	{
+		return $this->paths;
+	}
+
+	/**
+	 * Replace all the paths
+	 *
+	 * @param   array  $paths  paths
+	 * @return  $this
+	 */
+	public function setPaths(array $paths)
+	{
+		$this->paths = array();
+		$this->addPaths($paths);
+
+		return $this;
+	}
+
+	/**
 	 * Remove paths to look in
 	 *
 	 * @param   array  $paths  paths to remove
