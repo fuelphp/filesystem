@@ -82,9 +82,27 @@ class Finder
 		if (isset($this->paths[$path]))
 		{
 			unset($this->paths[$path]);
+
+			$this->removePathCache($path);
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Remove path cache
+	 *
+	 * @param  string  $path  path
+	 */
+	public function removePathCache($path)
+	{
+		foreach ($this->cache as $key => $cache)
+		{
+			if (in_array($path, $cache[1]))
+			{
+				unset($this->cache[$key]);
+			}
+		}
 	}
 
 	/**
@@ -141,6 +159,7 @@ class Finder
 			return $cached;
 		}
 
+		$used = array();
 		$found = array();
 		$paths = $reversed ? array_reverse($this->paths) : $this->paths;
 
@@ -149,11 +168,12 @@ class Finder
 			if (is_file($path.$file))
 			{
 				$found[] = $path.$file;
+				$used[] = $path;
 			}
 		}
 
 		// Store the paths in cache
-		$this->cache('all', $file, $reversed, $found);
+		$this->cache('all', $file, $reversed, $found, $used);
 
 		return $found;
 	}
@@ -231,7 +251,7 @@ class Finder
 
 		if (isset($this->cache[$cacheKey]))
 		{
-			return $this->cache[$cacheKey];
+			return $this->cache[$cacheKey][0];
 		}
 	}
 
@@ -250,15 +270,16 @@ class Finder
 	/**
 	 * Cache a find result
 	 *
-	 * @param   string   $scope     find scope
-	 * @param   string   $file      file name
-	 * @param   boolean  $reversed  wether it was a reversed search
+	 * @param   string   $scope      find scope
+	 * @param   string   $file       file name
+	 * @param   boolean  $reversed   wether it was a reversed search
+	 * @param   array    $pathsUsed  which paths it depended on
 	 * @return  $this
 	 */
-	public function cache($scope, $file, $reversed, $result)
+	public function cache($scope, $file, $reversed, $result, $pathsUsed = array())
 	{
 		$cacheKey = $this->makeCacheKey($scope, $file, $reversed);
-		$this->cache[$cacheKey] = $result;
+		$this->cache[$cacheKey] = array($result, $pathsUsed);
 
 		return $this;
 	}
