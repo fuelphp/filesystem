@@ -9,7 +9,7 @@ class Finder
 	/**
 	 * @var  string  $defaultExtension  default extension
 	 */
-	protected $defaultExtension = 'php';
+	protected $defaultExtension;
 
 	/**
 	 * @var  array  $paths  paths to look in
@@ -21,9 +21,10 @@ class Finder
 	 *
 	 * @param  array  $path  paths
 	 */
-	public function __construct($paths = array())
+	public function __construct($paths = array(), $defaultExtension = 'php')
 	{
 		$this->addPaths((array) $paths);
+		$this->setDefaultExtension($defaultExtension);
 	}
 
 	/**
@@ -219,7 +220,7 @@ class Finder
 		if (isset($found))
 		{
 			// Store the paths in cache
-			$this->cache('one', $file, $reversed, $found);
+			$this->cache('one', $file, $reversed, $found, array($path));
 
 			return $found;
 		}
