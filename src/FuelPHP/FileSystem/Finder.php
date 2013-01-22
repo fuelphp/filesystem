@@ -3,6 +3,7 @@
 namespace FuelPHP\FileSystem;
 
 use Closure;
+use Exception;
 
 class Finder
 {
@@ -17,11 +18,18 @@ class Finder
 	protected $paths = array();
 
 	/**
+	 * @var  string  $root  root restriction
+	 */
+	protected $root;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param  array  $path  paths
+	 * @param  array   $path  paths
+	 * @param  string  $defaultExtension  default file extension
+	 * @param  string  $root              root restriction
 	 */
-	public function __construct(array $paths = null, $defaultExtension = null)
+	public function __construct(array $paths = null, $defaultExtension = null, $root = null)
 	{
 		if ($paths)
 		{
@@ -32,6 +40,36 @@ class Finder
 		{
 			$this->setDefaultExtension($defaultExtension);
 		}
+
+		$this->root = $root;
+	}
+
+	/**
+	 * Set a root restriction
+	 *
+	 * @param   string  $root  root restriction
+	 * @return  $this
+	 */
+	public function setRoot($root)
+	{
+		if ( ! $path = realpath($root))
+		{
+			throw new Exception('Location does not exist: '.$root);
+		}
+
+		$this->root = $path;
+
+		return $this;
+	}
+
+	/**
+	 * Get the root
+	 *
+	 * @return  string  root path
+	 */
+	public function getRoot()
+	{
+		return $this->root;
 	}
 
 	/**
@@ -58,11 +96,6 @@ class Finder
 	public function addPath($path, $clearCache = true)
 	{
 		$path = $this->normalizePath($path);
-
-		if ( ! $path)
-		{
-			throw new Exception('Path does not exist: '.func_get_arg(0));
-		}
 
 		// This is done for easy reference and
 		// eliminates the need to check for doubles
@@ -134,8 +167,14 @@ class Finder
 	public function normalizePath($path)
 	{
 		$path = rtrim($path, '/\\').'/';
+		$path = realpath($path).'/';
 
-		return realpath($path).'/';
+		if ($this->root and strpos($path, $this->root) !== 0)
+		{
+			throw new Exception('Cannot access path outside: '.$this->root.'. Trying to access: '.$path);
+		}
+
+		return $path;
 	}
 
 	/**
@@ -331,9 +370,7 @@ class Finder
 	 */
 	public function normalizeFileName($file)
 	{
-		$extension = pathinfo($file, PATHINFO_EXTENSION);
-
-		if ( ! $extension)
+		if ( ! pathinfo($file, PATHINFO_EXTENSION))
 		{
 			$file .= '.'.$this->defaultExtension;
 		}

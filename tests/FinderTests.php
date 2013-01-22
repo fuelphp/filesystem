@@ -57,10 +57,31 @@ class FinderTests extends PHPUnit_Framework_TestCase
 	public function testConstructor()
 	{
 		$finder = new Finder(array(
-			__DIR__.'/resources/three/',
+			__DIR__.'/../resources/three/',
 		), 'txt');
 
-		$expected = realpath(__DIR__.'/resources/three/a.txt');
+		$expected = realpath(__DIR__.'/../resources/three/a.txt');
 		$this->assertEquals($expected, $finder->find('a'));
+	}
+
+	/**
+	 * @expectedException  Exception
+	 */
+	public function testRoot()
+	{
+		$f = new Finder();
+		$f->setRoot(__DIR__.'/../resources');
+		$expected = realpath(__DIR__.'/../resources');
+		$this->assertEquals($expected, $f->getRoot());
+		$f->addPath(__DIR__);
+	}
+
+	/**
+	 * @expectedException  Exception
+	 */
+	public function testInvalidRoot()
+	{
+		$f = new Finder;
+		$f->setRoot('not a path');
 	}
 }
