@@ -6,50 +6,61 @@ class FinderTests extends PHPUnit_Framework_TestCase
 {
 	public function testFindFile()
 	{
+		$base = realpath(__DIR__.'/../resources/');
 		$finder = new Finder();
-		$finder->setPaths(array(__DIR__.'/../resources/one'));
+		$finder->setPaths(array($base.'/one'));
 
 		$this->assertNull($finder->find('null'));
 
-		$this->assertEquals(__DIR__.'/../resources/one/a.php', $finder->find('a'));
+		$this->assertEquals($base.'/one/a.php', $finder->find('a'));
 
 		$this->assertEquals(array(
-			__DIR__.'/../resources/one/a.php'
+			$base.'/one/a.php'
 		), $finder->findAll('a'));
 
 		$this->assertEquals(array(
-			__DIR__.'/../resources/one/a.php'
+			$base.'/one/a.php'
 		), $finder->findAll('a'));
 
 		$finder->addPaths(array(
-			__DIR__.'/../resources/two',
-			__DIR__.'/../resources/three',
+			$base.'/two',
+			$base.'/three',
 		));
 
 		$this->assertEquals(array(
-			__DIR__.'/../resources/three/a.php',
-			__DIR__.'/../resources/one/a.php',
+			$base.'/three/a.php',
+			$base.'/one/a.php',
 		), $finder->findAllReversed('a'));
 
-		$this->assertEquals(__DIR__.'/../resources/three/a.php', $finder->findReversed('a'));
-		$this->assertEquals(__DIR__.'/../resources/three/a.txt', $finder->findReversed('a.txt'));
+		$this->assertEquals($base.'/three/a.php', $finder->findReversed('a'));
+		$this->assertEquals($base.'/three/a.txt', $finder->findReversed('a.txt'));
 
 		$finder->setDefaultExtension('txt');
 		$finder->clearCache();
 		$this->assertEquals(array(
-			__DIR__.'/../resources/two/a.txt',
-			__DIR__.'/../resources/three/a.txt',
+			$base.'/two/a.txt',
+			$base.'/three/a.txt',
 		), $finder->findAll('a'));
 
 		$this->assertEquals(array(
-			__DIR__.'/../resources/one/',
-			__DIR__.'/../resources/two/',
-			__DIR__.'/../resources/three/',
+			$base.'/one/',
+			$base.'/two/',
+			$base.'/three/',
 		), $finder->getPaths());
 
-		$this->assertEquals(__DIR__.'/../resources/one/a.php', $finder->find('a.php'));
-		$this->assertEquals(__DIR__.'/../resources/one/a.php', $finder->find('a.php'));
-		$finder->removePaths(array(__DIR__.'/../resources/one'));
-		$this->assertEquals(__DIR__.'/../resources/three/a.php', $finder->find('a.php'));
+		$this->assertEquals($base.'/one/a.php', $finder->find('a.php'));
+		$this->assertEquals($base.'/one/a.php', $finder->find('a.php'));
+		$finder->removePaths(array($base.'/one'));
+		$this->assertEquals($base.'/three/a.php', $finder->find('a.php'));
+	}
+
+	public function testConstructor()
+	{
+		$finder = new Finder(array(
+			__DIR__.'/resources/three/',
+		), 'txt');
+
+		$expected = realpath(__DIR__.'/resources/three/a.txt');
+		$this->assertEquals($expected, $finder->find('a'));
 	}
 }

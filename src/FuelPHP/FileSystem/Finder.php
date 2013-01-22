@@ -9,7 +9,7 @@ class Finder
 	/**
 	 * @var  string  $defaultExtension  default extension
 	 */
-	protected $defaultExtension;
+	protected $defaultExtension = 'php';
 
 	/**
 	 * @var  array  $paths  paths to look in
@@ -21,21 +21,29 @@ class Finder
 	 *
 	 * @param  array  $path  paths
 	 */
-	public function __construct($paths = array(), $defaultExtension = 'php')
+	public function __construct(array $paths = null, $defaultExtension = null)
 	{
-		$this->addPaths((array) $paths);
-		$this->setDefaultExtension($defaultExtension);
+		if ($paths)
+		{
+			$this->addPaths((array) $paths);
+		}
+
+		if ($defaultExtension)
+		{
+			$this->setDefaultExtension($defaultExtension);
+		}
 	}
 
 	/**
 	 * Adds paths to look in.
 	 *
 	 * @param   array  $paths  paths
+	 * @param   boolean  $clearCache  wether to clear the cache
 	 * @return  $this
 	 */
-	public function addPaths(array $paths)
+	public function addPaths(array $paths, $clearCache = true)
 	{
-		array_map(array($this, 'addPath'), $paths);
+		array_map(array($this, 'addPath'), $paths, array($clearCache));
 
 		return $this;
 	}
@@ -43,16 +51,27 @@ class Finder
 	/**
 	 * Add a path
 	 *
-	 * @param   string  $path  path
+	 * @param   string   $path        path
+	 * @param   boolean  $clearCache  wether to clear the cache
 	 * @return  $this
 	 */
-	public function addPath($path)
+	public function addPath($path, $clearCache = true)
 	{
 		$path = $this->normalizePath($path);
+
+		if ( ! $path)
+		{
+			throw new Exception('Path does not exist: '.func_get_arg(0));
+		}
 
 		// This is done for easy reference and
 		// eliminates the need to check for doubles
 		$this->paths[$path] = $path;
+
+		if ($clearCache)
+		{
+			$this->cache = array();
+		}
 
 		return $this;
 	}
@@ -80,7 +99,7 @@ class Finder
 	{
 		$path = $this->normalizePath($path);
 
-		if (isset($this->paths[$path]))
+		if ($path and isset($this->paths[$path]))
 		{
 			unset($this->paths[$path]);
 
@@ -114,10 +133,9 @@ class Finder
 	 */
 	public function normalizePath($path)
 	{
-		$seperators = array('\\', '/./', '//');
-		$path = str_replace($seperators, '/', $path);
+		$path = rtrim($path, '/\\').'/';
 
-		return rtrim($path, '/').'/';
+		return realpath($path).'/';
 	}
 
 	/**
