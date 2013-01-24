@@ -14,11 +14,7 @@
 	"require": {
 		"php": ">=5.3.3"
 	},
-	"require-dev": {
-		"mockery/mockery": "0.7.*"
-	},
 	"autoload": {
 		"psr-0": { "FuelPHP\\FileSystem": "src/" }
-	},
-	"minimum-stability": "dev"
+	}
 }

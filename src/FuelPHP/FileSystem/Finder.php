@@ -23,6 +23,16 @@ class Finder
 	protected $root;
 
 	/**
+	 * @var  boolean  $returnHandlers  wether to return handlers
+	 */
+	protected $returnHandlers = false;
+
+	/**
+	 * @var  null|boolean  $nextAsHandlers  wether to fetch the next result as handler objects
+	 */
+	protected $nextAsHandlers = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param  array   $path  paths
@@ -42,6 +52,32 @@ class Finder
 		}
 
 		$this->root = $root;
+	}
+
+	/**
+	 * Wether to return handlers.
+	 *
+	 * @param   boolean  $returnHandlers  wether to return handlers
+	 * @return  $this
+	 */
+	public function returnHandlers($returnHandlers = true)
+	{
+		$this->returnHandlers = $returnHandlers;
+
+		return $this;
+	}
+
+	/**
+	 * Wether to let the next find result return handlers.
+	 *
+	 * @param   boolean  $returnHandlers  wether to return handlers
+	 * @return  $this
+	 */
+	public function asHandlers($returnHandlers = true)
+	{
+		$this->nextAsHandlers = $returnHandlers;
+
+		return $this;
 	}
 
 	/**
@@ -145,7 +181,8 @@ class Finder
 	/**
 	 * Remove path cache
 	 *
-	 * @param  string  $path  path
+	 * @param   string  $path  path
+	 * @return  $this
 	 */
 	public function removePathCache($path)
 	{
@@ -156,6 +193,8 @@ class Finder
 				unset($this->cache[$key]);
 			}
 		}
+
+		return $this;
 	}
 
 	/**
@@ -163,6 +202,7 @@ class Finder
 	 *
 	 * @param   string  $path  path
 	 * @return  string  normalized path
+	 * @throws  Exception
 	 */
 	public function normalizePath($path)
 	{
@@ -204,15 +244,29 @@ class Finder
 	/**
 	 * Find all files with a given name/subpath.
 	 *
-	 * @param   string   $file      file name
+	 * @param   string   $name      file name
 	 * @param   boolean  $reload    wether to bypass cache
 	 * @param   boolean  $reversed  wether to search reversed
+	 * @param   string   $type      dir, file or all
 	 */
-	public function findAll($file, $reload = false, $reversed = false)
+	public function findAll($name, $reload = false, $reversed = false, $type = 'all')
 	{
-		$file = $this->normalizeFileName($file);
+		$name = trim($name, '/');
+		$scope = 'all::'.$type;
+		$asHandlers = $this->returnHandlers;
 
-		if ( ! $reload and $cached = $this->findCached('all', $file, $reversed))
+		if ($this->nextAsHandlers !== null)
+		{
+			$asHandlers = $this->nextAsHandlers;
+			$this->nextAsHandlers = null;
+		}
+
+		if ($type !== 'dir')
+		{
+			$file = $this->normalizeFileName($name);
+		}
+
+		if ( ! $reload and $cached = $this->findCached($scope, $name, $reversed))
 		{
 			return $cached;
 		}
@@ -223,42 +277,108 @@ class Finder
 
 		foreach ($paths as $path)
 		{
-			if (is_file($path.$file))
+			if ($type !== 'dir' and is_file($path.$file))
 			{
-				$found[] = $path.$file;
+				$found[] = $asHandlers ? new File($path.$file) : $path.$file;
+				$used[] = $path;
+			}
+			elseif ($type !== 'file' and is_dir($path.$name))
+			{
+				$found[] = $asHandlers ? new Directory($path.$name) : $path.$name;
 				$used[] = $path;
 			}
 		}
 
 		// Store the paths in cache
-		$this->cache('all', $file, $reversed, $found, $used);
+		$this->cache($scope, $name, $reversed, $found, $used);
 
 		return $found;
 	}
 
 	/**
-	 * Reverse-find all files with a given name/subpath.
+	 * Find all files with a given name/subpath.
 	 *
-	 * @param   string   $file      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 */
-	public function findAllReversed($file, $reload = false)
-	{
-		return $this->findAll($file, $reload, true);
-	}
-
-	/**
-	 * Find one file with a given name/subpath.
-	 *
-	 * @param   string   $file      file name
+	 * @param   string   $name      file name
 	 * @param   boolean  $reload    wether to bypass cache
 	 * @param   boolean  $reversed  wether to search reversed
 	 */
-	public function find($file, $reload = false, $reversed = false)
+	public function findAllFiles($name, $reload = false, $reversed = false)
 	{
-		$file = $this->normalizeFileName($file);
+		return $this->findAll($name, $reload, $reversed, 'file');
+	}
 
-		if ( ! $reload and $cached = $this->findCached('one', $file, $reversed))
+	/**
+	 * Find all directories with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   boolean  $reversed  wether to search reversed
+	 */
+	public function findAllDirs($name, $reload = false, $reversed = false)
+	{
+		return $this->findAll($name, $reload, $reversed, 'dir');
+	}
+
+	/**
+	 * Reverse-find all files and directories with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   string   $type      dir, file or all
+	 */
+	public function findAllReversed($name, $reload = false, $type = 'all')
+	{
+		return $this->findAll($name, $reload, true, $type);
+	}
+
+	/**
+	 * Reverse-find all directories with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 */
+	public function findAllDirsReversed($name, $reload = false)
+	{
+		return $this->findAll($name, $reload, true, 'dir');
+	}
+
+	/**
+	 * Reverse-find all files with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 */
+	public function findAllFilesReversed($name, $reload = false)
+	{
+		return $this->findAll($name, $reload, true, 'file');
+	}
+
+	/**
+	 * Find one file or directories with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   boolean  $reversed  wether to search reversed
+	 * @param   string   $type      dir, file or all
+	 */
+	public function find($name, $reload = false, $reversed = false, $type = 'all')
+	{
+		$name = trim($name, '/');
+		$scope = 'one::'.$type;
+		$asHandlers = $this->returnHandlers;
+
+		if ($this->nextAsHandlers !== null)
+		{
+			$asHandlers = $this->nextAsHandlers;
+			$this->nextAsHandlers = null;
+		}
+
+		if ($type !== 'dir')
+		{
+			$file = $this->normalizeFileName($name);
+		}
+
+		if ( ! $reload and $cached = $this->findCached($scope, $name, $reversed))
 		{
 			return $cached;
 		}
@@ -267,9 +387,25 @@ class Finder
 
 		foreach ($paths as $path)
 		{
-			if (is_file($path.$file))
+			if ($type !== 'dir' and is_file($path.$file))
 			{
 				$found = $path.$file;
+
+				if ($asHandlers)
+				{
+					$found = new File($found);
+				}
+
+				break;
+			}
+			elseif ($type !== 'file' and is_dir($path.$name))
+			{
+				$found = $path.$name;
+
+				if ($asHandlers)
+				{
+					$found = new Directory($found);
+				}
 				break;
 			}
 		}
@@ -277,35 +413,84 @@ class Finder
 		if (isset($found))
 		{
 			// Store the paths in cache
-			$this->cache('one', $file, $reversed, $found, array($path));
+			$this->cache($scope, $name, $reversed, $found, array($path));
 
 			return $found;
 		}
 	}
 
 	/**
-	 * Reverse-find one file with a given name/subpath.
+	 * Find one file with a given name/subpath.
 	 *
-	 * @param   string   $file      file name
+	 * @param   string   $name      file name
 	 * @param   boolean  $reload    wether to bypass cache
 	 * @param   boolean  $reversed  wether to search reversed
 	 */
-	public function findReversed($file, $reload = false)
+	public function findFile($name, $reload = false, $reversed = false)
 	{
-		return $this->find($file, $reload, true);
+		return $this->find($name, $reload, $reversed, 'file');
+	}
+
+	/**
+	 * Find one directories with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   boolean  $reversed  wether to search reversed
+	 */
+	public function findDir($name, $reload = false, $reversed = false)
+	{
+		return $this->find($name, $reload, $reversed, 'dir');
+	}
+
+	/**
+	 * Reverse-find one file or directory with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   boolean  $reversed  wether to search reversed
+	 * @param   string   $type      dir, file or all
+	 */
+	public function findReversed($name, $reload = false, $type = 'all')
+	{
+		return $this->find($name, $reload, true, $type);
+	}
+
+	/**
+	 * Reverse-find one file with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   boolean  $reversed  wether to search reversed
+	 */
+	public function findFileReversed($name, $reload = false)
+	{
+		return $this->findReversed($name, $reload, 'file');
+	}
+
+	/**
+	 * Reverse-find one directory with a given name/subpath.
+	 *
+	 * @param   string   $name      file name
+	 * @param   boolean  $reload    wether to bypass cache
+	 * @param   boolean  $reversed  wether to search reversed
+	 */
+	public function findDirReversed($name, $reload = false)
+	{
+		return $this->findReversed($name, $reload, 'dir');
 	}
 
 	/**
 	 * Retrieve a location from cache.
 	 *
 	 * @param   string        $scope     scope [all,one]
-	 * @param   string        $file      file name
+	 * @param   string        $name      file name
 	 * @param   boolean       $reversed  wether the search was reversed
 	 * @return  string|array  cached result
 	 */
-	public function findCached($scope, $file, $reversed)
+	public function findCached($scope, $name, $reversed)
 	{
-		$cacheKey = $this->makeCacheKey($scope, $file, $reversed);
+		$cacheKey = $this->makeCacheKey($scope, $name, $reversed);
 
 		if (isset($this->cache[$cacheKey]))
 		{
@@ -329,14 +514,14 @@ class Finder
 	 * Cache a find result
 	 *
 	 * @param   string   $scope      find scope
-	 * @param   string   $file       file name
+	 * @param   string   $name       file name
 	 * @param   boolean  $reversed   wether it was a reversed search
 	 * @param   array    $pathsUsed  which paths it depended on
 	 * @return  $this
 	 */
-	public function cache($scope, $file, $reversed, $result, $pathsUsed = array())
+	public function cache($scope, $name, $reversed, $result, $pathsUsed = array())
 	{
-		$cacheKey = $this->makeCacheKey($scope, $file, $reversed);
+		$cacheKey = $this->makeCacheKey($scope, $name, $reversed);
 		$this->cache[$cacheKey] = array($result, $pathsUsed);
 
 		return $this;
@@ -346,13 +531,13 @@ class Finder
 	 * Generate a cache key
 	 *
 	 * @param   string   $scope     find scope
-	 * @param   string   $file      file name
+	 * @param   string   $name      file name
 	 * @param   boolean  $reversed  wether it was a reversed search
 	 * @return  string   cache key
 	 */
-	public function makeCacheKey($scope, $file, $reversed)
+	public function makeCacheKey($scope, $name, $reversed)
 	{
-		$cacheKey = $scope.'::'.$file;
+		$cacheKey = $scope.'::'.$name;
 
 		if ($reversed)
 		{
@@ -365,17 +550,17 @@ class Finder
 	/**
 	 * Normalize a file name
 	 *
-	 * @param   string  $file  file name
+	 * @param   string  $name  file name
 	 * @return  string  normalized filename
 	 */
-	public function normalizeFileName($file)
+	public function normalizeFileName($name)
 	{
-		if ( ! pathinfo($file, PATHINFO_EXTENSION))
+		if ( ! pathinfo($name, PATHINFO_EXTENSION))
 		{
-			$file .= '.'.$this->defaultExtension;
+			$name .= '.'.$this->defaultExtension;
 		}
 
-		return ltrim($file, '/');
+		return ltrim($name, '/');
 	}
 
 	/**
