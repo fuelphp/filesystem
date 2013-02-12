@@ -2,14 +2,14 @@
 
 namespace FuelPHP\FileSystem;
 
-class File
+class File extends Handler
 {
 	/**
 	 * Get the files contents
 	 *
 	 * @return  string  file contents
 	 */
-	public function read()
+	public function getContents()
 	{
 		return file_get_contents($this->path);
 	}

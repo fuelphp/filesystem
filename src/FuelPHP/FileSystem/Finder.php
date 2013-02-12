@@ -43,7 +43,7 @@ class Finder
 	{
 		if ($paths)
 		{
-			$this->addPaths((array) $paths);
+			$this->addPaths((array) $paths, false);
 		}
 
 		if ($defaultExtension)
@@ -76,6 +76,19 @@ class Finder
 	public function asHandlers($returnHandlers = true)
 	{
 		$this->nextAsHandlers = $returnHandlers;
+
+		return $this;
+	}
+
+	/**
+	 * Wether to let the next find result return a handler.
+	 *
+	 * @param   boolean  $returnHandler  wether to return handlers
+	 * @return  $this
+	 */
+	public function asHandler($returnHandler = true)
+	{
+		$this->nextAsHandlers = $returnHandler;
 
 		return $this;
 	}
@@ -115,9 +128,10 @@ class Finder
 	 * @param   boolean  $clearCache  wether to clear the cache
 	 * @return  $this
 	 */
-	public function addPaths(array $paths, $clearCache = true)
+	public function addPaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
 	{
-		array_map(array($this, 'addPath'), $paths, array($clearCache));
+		//var_dump(func_get_args());
+		array_map(array($this, 'addPath'), $paths, array(array($clearCache, $group)));
 
 		return $this;
 	}
@@ -129,13 +143,14 @@ class Finder
 	 * @param   boolean  $clearCache  wether to clear the cache
 	 * @return  $this
 	 */
-	public function addPath($path, $clearCache = true)
+	public function addPath($path, $clearCache = true, $group = '__DEFAULT__')
 	{
+		//var_dump(func_get_args());
 		$path = $this->normalizePath($path);
 
 		// This is done for easy reference and
 		// eliminates the need to check for doubles
-		$this->paths[$path] = $path;
+		$this->paths[$group][$path] = $path;
 
 		if ($clearCache)
 		{
@@ -151,9 +166,9 @@ class Finder
 	 * @param   array  $paths  paths to remove
 	 * @return  $this
 	 */
-	public function removePaths(array $paths)
+	public function removePaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
 	{
-		array_map(array($this, 'removePath'), $paths);
+		array_map(array($this, 'removePath'), $paths, array(array($clearCache, $group)));
 
 		return $this;
 	}
@@ -164,15 +179,15 @@ class Finder
 	 * @param   string  $path  path
 	 * @return  $this
 	 */
-	public function removePath($path)
+	public function removePath($path, $clearCache = true, $group = '__DEFAULT__')
 	{
 		$path = $this->normalizePath($path);
 
-		if ($path and isset($this->paths[$path]))
+		if ($path and isset($this->paths[$group][$path]))
 		{
-			unset($this->paths[$path]);
+			unset($this->paths[$group][$path]);
 
-			$this->removePathCache($path);
+			if ($clearCache) $this->removePathCache($path);
 		}
 
 		return $this;
@@ -188,7 +203,7 @@ class Finder
 	{
 		foreach ($this->cache as $key => $cache)
 		{
-			if (in_array($path, $cache[1]))
+			if (in_array($path, $cache['used']))
 			{
 				unset($this->cache[$key]);
 			}
@@ -222,9 +237,24 @@ class Finder
 	 *
 	 * @return  array  paths array
 	 */
-	public function getPaths()
+	public function getPaths($group = '__DEFAULT__')
 	{
-		return array_values($this->paths);
+		if ( ! isset($this->paths[$group]))
+		{
+			return array();
+		}
+
+		return array_values($this->paths[$group]);
+	}
+
+	/**
+	 * Retrieve the path groups.
+	 *
+	 * @return  array  path groups
+	 */
+	public function getGroups()
+	{
+		return array_keys($this->paths);
 	}
 
 	/**
@@ -233,10 +263,15 @@ class Finder
 	 * @param   array  $paths  paths
 	 * @return  $this
 	 */
-	public function setPaths(array $paths)
+	public function setPaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
 	{
-		$this->paths = array();
-		$this->addPaths($paths);
+		$this->paths[$group] = array();
+		$this->addPaths($paths, false, $group);
+
+		if ($clearCache)
+		{
+			$this->cache = array();
+		}
 
 		return $this;
 	}
@@ -254,6 +289,8 @@ class Finder
 		$name = trim($name, '/');
 		$scope = 'all::'.$type;
 		$asHandlers = $this->returnHandlers;
+		$group = '__DEFAULT__';
+		$query = $name;
 
 		if ($this->nextAsHandlers !== null)
 		{
@@ -261,9 +298,19 @@ class Finder
 			$this->nextAsHandlers = null;
 		}
 
+		if (strpos($query, '::') !== false)
+		{
+			list($group, $query) = explode('::', $query);
+		}
+
+		if ( ! isset($this->paths[$group]))
+		{
+			return array();
+		}
+
 		if ($type !== 'dir')
 		{
-			$file = $this->normalizeFileName($name);
+			$query = $this->normalizeFileName($query);
 		}
 
 		if ( ! $reload and $cached = $this->findCached($scope, $name, $reversed))
@@ -273,18 +320,18 @@ class Finder
 
 		$used = array();
 		$found = array();
-		$paths = $reversed ? array_reverse($this->paths) : $this->paths;
+		$paths = $reversed ? array_reverse($this->paths[$group]) : $this->paths[$group];
 
 		foreach ($paths as $path)
 		{
-			if ($type !== 'dir' and is_file($path.$file))
+			if ($type !== 'dir' and is_file($path.$query))
 			{
-				$found[] = $asHandlers ? new File($path.$file) : $path.$file;
+				$found[] = $asHandlers ? new File($path.$query) : $path.$query;
 				$used[] = $path;
 			}
-			elseif ($type !== 'file' and is_dir($path.$name))
+			elseif ($type !== 'file' and is_dir($path.$query))
 			{
-				$found[] = $asHandlers ? new Directory($path.$name) : $path.$name;
+				$found[] = $asHandlers ? new Directory($path.$query, $this->returnHandlers) : $path.$query;
 				$used[] = $path;
 			}
 		}
@@ -366,6 +413,8 @@ class Finder
 		$name = trim($name, '/');
 		$scope = 'one::'.$type;
 		$asHandlers = $this->returnHandlers;
+		$query = $name;
+		$group = '__DEFAULT__';
 
 		if ($this->nextAsHandlers !== null)
 		{
@@ -373,9 +422,19 @@ class Finder
 			$this->nextAsHandlers = null;
 		}
 
+		if (strpos($query, '::') !== false)
+		{
+			list($group, $query) = explode('::', $query);
+		}
+
+		if ( ! isset($this->paths[$group]))
+		{
+			return;
+		}
+
 		if ($type !== 'dir')
 		{
-			$file = $this->normalizeFileName($name);
+			$query = $this->normalizeFileName($query);
 		}
 
 		if ( ! $reload and $cached = $this->findCached($scope, $name, $reversed))
@@ -383,13 +442,18 @@ class Finder
 			return $cached;
 		}
 
-		$paths = $reversed ? array_reverse($this->paths) : $this->paths;
+		$paths = $this->paths[$group];
+
+		if ($reversed)
+		{
+			$paths = array_reverse($paths);
+		}
 
 		foreach ($paths as $path)
 		{
-			if ($type !== 'dir' and is_file($path.$file))
+			if ($type !== 'dir' and is_file($path.$query))
 			{
-				$found = $path.$file;
+				$found = $path.$query;
 
 				if ($asHandlers)
 				{
@@ -398,14 +462,15 @@ class Finder
 
 				break;
 			}
-			elseif ($type !== 'file' and is_dir($path.$name))
+			elseif ($type !== 'file' and is_dir($path.$query))
 			{
-				$found = $path.$name;
+				$found = $path.$query;
 
 				if ($asHandlers)
 				{
 					$found = new Directory($found);
 				}
+
 				break;
 			}
 		}
@@ -494,7 +559,7 @@ class Finder
 
 		if (isset($this->cache[$cacheKey]))
 		{
-			return $this->cache[$cacheKey][0];
+			return $this->cache[$cacheKey]['result'];
 		}
 	}
 
@@ -522,7 +587,10 @@ class Finder
 	public function cache($scope, $name, $reversed, $result, $pathsUsed = array())
 	{
 		$cacheKey = $this->makeCacheKey($scope, $name, $reversed);
-		$this->cache[$cacheKey] = array($result, $pathsUsed);
+		$this->cache[$cacheKey] = array(
+			'result' => $result,
+			'used' => $pathsUsed
+		);
 
 		return $this;
 	}
@@ -560,7 +628,7 @@ class Finder
 			$name .= '.'.$this->defaultExtension;
 		}
 
-		return ltrim($name, '/');
+		return $name;
 	}
 
 	/**

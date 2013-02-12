@@ -8,7 +8,11 @@ class FinderTests extends PHPUnit_Framework_TestCase
 	{
 		$base = realpath(__DIR__.'/../resources/');
 		$finder = new Finder();
+		$this->assertEquals(array(), $finder->getPaths());
 		$finder->setPaths(array($base.'/one'));
+		$this->assertEquals(array('__DEFAULT__'), $finder->getGroups());
+		$this->assertEquals(array(), $finder->findAllFiles('group::a'));
+		$this->assertNull($finder->findFile('group::a'));
 
 		$this->assertNull($finder->findFile('null'));
 
@@ -50,10 +54,11 @@ class FinderTests extends PHPUnit_Framework_TestCase
 		$finder->asHandlers();
 		$finder->addPath(__DIR__.'/../resources');
 		$this->assertContainsOnlyInstancesOf('FuelPHP\FileSystem\File', $finder->findAll('a'));
-		$finder->asHandlers();
+		$finder->asHandler();
 		$this->assertContainsOnlyInstancesOf('FuelPHP\FileSystem\Directory', $finder->findAll('one'));
 
 		$finder->removePath(__DIR__.'/../resources');
+
 		$this->assertEquals(array(
 			$base.'/one/',
 			$base.'/two/',

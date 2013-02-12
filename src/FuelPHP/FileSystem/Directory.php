@@ -2,6 +2,8 @@
 
 namespace FuelPHP\FileSystem;
 
+use Closure;
+
 class Directory extends Handler
 {
 	/**
@@ -41,36 +43,63 @@ class Directory extends Handler
 	/**
 	 * List all files in a directory
 	 *
-	 * @param   int    $depth   depth
-	 * @param   mixed  $filter  filter
-	 * @return  array  directory contents
+	 * @param   int      $depth        depth
+	 * @param   mixed    $filter       filter
+	 * @param   boolean  $asHandlers    return handlers or plain formatted
+	 * @return  array    directory contents
 	 */
-	public function listFiles($depth = 0, $filter = null)
+	public function listFiles($depth = 0, $filter = null, $asHandlers = false)
 	{
-		return $this->listContents($depth, $filter, 'file');
+		return $this->listContents($depth, $filter, 'file', $asHandlers);
+	}
+
+	/**
+	 * List all files in a directory
+	 *
+	 * @param   int      $depth        depth
+	 * @param   mixed    $filter       filter
+	 * @return  array    directory contents
+	 */
+	public function listFileHandlers($depth = 0, $filter = null)
+	{
+		return $this->listContents($depth, $filter, 'file', true);
 	}
 
 	/**
 	 * List all directories in a directory
 	 *
-	 * @param   int    $depth   depth
-	 * @param   mixed  $filter  filter
-	 * @return  array  directory contents
+	 * @param   int      $depth        depth
+	 * @param   mixed    $filter       filter
+	 * @param   boolean  $asHandlers    return handlers or plain formatted
+	 * @return  array    directory contents
 	 */
-	public function listDirs($depth = 0, $filter = null)
+	public function listDirs($depth = 0, $filter = null, $asHandlers = false)
 	{
-		return $this->listContents($depth, $filter, 'dir');
+		return $this->listContents($depth, $filter, 'dir', $asHandlers);
+	}
+
+	/**
+	 * List all directories in a directory
+	 *
+	 * @param   int      $depth        depth
+	 * @param   mixed    $filter       filter
+	 * @return  array    directory contents
+	 */
+	public function listDirHandlers($depth = 0, $filter = null)
+	{
+		return $this->listContents($depth, $filter, 'dir', true);
 	}
 
 	/**
 	 * List all files and directories in a directory
 	 *
-	 * @param   int     $depth   depth
-	 * @param   mixed   $filter  filter
-	 * @param   string  $type    file or dir
-	 * @return  array   directory contents
+	 * @param   int      $depth        depth
+	 * @param   mixed    $filter       filter
+	 * @param   string   $type         file or dir
+	 * @param   boolean  $asHandlers    return handlers or plain formatted
+	 * @return  array    directory contents
 	 */
-	public function listContents($depth = 0, $filter = null, $type = 'all')
+	public function listContents($depth = 0, $filter = null, $type = 'all', $asHandlers = false)
 	{
 		$pattern = $this->path.'/*';
 
@@ -87,9 +116,16 @@ class Directory extends Handler
 					$type = null;
 				}
 
+				$expected = true;
 
+				if (strpos($f, '!') === 0)
+				{
+					$f = substr($f, 1);
+					$expected = false;
+				}
+
+				$filter->addFilter($f, $expected, $type);
 			}
-
 		}
 
 		if ($filter instanceof Closure)
@@ -97,6 +133,11 @@ class Directory extends Handler
 			$callback = $filter;
 			$filter = new Filter();
 			$callback($filter);
+		}
+
+		if ( ! $filter)
+		{
+			$filter = new Filter;
 		}
 
 		$flags = GLOB_MARK;
@@ -108,16 +149,13 @@ class Directory extends Handler
 		}
 		elseif ($type === 'dir')
 		{
-			$flags = GLOB_MARK | GLOB_ONLYDIR | GLOB_MARK;
+			$flags = GLOB_MARK | GLOB_ONLYDIR;
 		}
 
 		$contents = glob($pattern, $flags);
 
 		// Filter the content.
-		if ($filter instanceof Filter)
-		{
-			$contents = $filter->filter($contents);
-		}
+		$contents = $filter->filter($contents);
 
 		// Lower the depth for a recursive call
 		if ($depth and $depth !== true)
@@ -129,19 +167,33 @@ class Directory extends Handler
 
 		foreach ($contents as $item)
 		{
-			if ($type !== 'file' and is_dir($item))
+			if ($filter->isCorrectType('dir', $item))
 			{
 				$_contents = array();
 
-				if ($depth === true or $depth === 0)
+				if (($depth === true or $depth === 0) and ! $asHandlers)
 				{
-					$_contents = $this->listContents($item, $filter, $depth, $type);
+					$dir = new Directory($item);
+
+					$_contents = $dir->listContents($item, $filter, $depth, $type);
 				}
 
-				$formatted[$item] = $_contents;
+				if ($asHandlers)
+				{
+					$formatted[] = new Directory($item);
+				}
+				else
+				{
+					$formatted[$item] = $_contents;
+				}
 			}
-			elseif ($type !== 'dir' and is_file($item))
+			elseif ($filter->isCorrectType('file', $item))
 			{
+				if ($asHandlers)
+				{
+					$item = new File($item);
+				}
+
 				$formatted[] = $item;
 			}
 		}

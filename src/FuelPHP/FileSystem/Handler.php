@@ -56,9 +56,19 @@ abstract class Handler
 	 */
 	public function renameTo($name)
 	{
-		if ($result =rename($this->path, $name))
+		if (strpos($name, '/') !== 0)
 		{
-			$this->path = $name;
+			$name = pathinfo($this->path, PATHINFO_DIRNAME).'/'.$name;
+		}
+
+		if ( ! pathinfo($name, PATHINFO_EXTENSION))
+		{
+			$name .= '.'.pathinfo($this->path, PATHINFO_EXTENSION);
+		}
+
+		if ($result = rename($this->path, $name))
+		{
+			$this->path = realpath($name);
 		}
 
 		return $result;
