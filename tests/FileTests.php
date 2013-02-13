@@ -27,7 +27,7 @@ class FileTests extends PHPUnit_Framework_TestCase
 		$this->assertTrue(file_exists(__DIR__.'/../resources/otherPlace.txt'));
 		$deleteThis->delete();
 		$this->assertFalse(file_exists(__DIR__.'/../resources/otherPlace.txt'));
-		$this->assertEquals('text/plain', $file->getMimeType());
+		$this->assertInternalType('string', $file->getMimeType());
 		$this->assertEquals('file', $file->getType());
 		$this->assertEquals($newContent, $file->getAccessTime());
 		$this->assertEquals($newContent, $file->getModifiedTime());
