@@ -29,7 +29,7 @@ class FileTests extends PHPUnit_Framework_TestCase
 		$this->assertFalse(file_exists(__DIR__.'/../resources/otherPlace.txt'));
 		$this->assertInternalType('string', $file->getMimeType());
 		$this->assertEquals('file', $file->getType());
-		$this->assertEquals($newContent, $file->getAccessTime());
-		$this->assertEquals($newContent, $file->getModifiedTime());
+		$this->assertInternalType('int', $file->getAccessTime());
+		$this->assertInternalType('int', $file->getModifiedTime());
 	}
 }
