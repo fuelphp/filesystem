@@ -2,7 +2,6 @@
 	"name": "fuelphp/filesystem",
 	"type": "library",
 	"description": "File system handling.",
-	"keywords": ["File", "I/O"],
 	"homepage": "https://github.com/fuelphp/filesystem",
 	"license": "MIT",
 	"authors": [
