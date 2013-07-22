@@ -1,6 +1,6 @@
 <?php
 
-use FuelPHP\FileSystem\Finder;
+use Fuel\FileSystem\Finder;
 
 class FinderTests extends PHPUnit_Framework_TestCase
 {
@@ -53,9 +53,9 @@ class FinderTests extends PHPUnit_Framework_TestCase
 
 		$finder->asHandlers();
 		$finder->addPath(__DIR__.'/../resources');
-		$this->assertContainsOnlyInstancesOf('FuelPHP\FileSystem\File', $finder->findAll('a'));
+		$this->assertContainsOnlyInstancesOf('Fuel\FileSystem\File', $finder->findAll('a'));
 		$finder->asHandler();
-		$this->assertContainsOnlyInstancesOf('FuelPHP\FileSystem\Directory', $finder->findAll('one'));
+		$this->assertContainsOnlyInstancesOf('Fuel\FileSystem\Directory', $finder->findAll('one'));
 
 		$finder->removePath(__DIR__.'/../resources');
 
@@ -115,17 +115,17 @@ class FinderTests extends PHPUnit_Framework_TestCase
 		$f->addPath(__DIR__.'/../resources/one');
 		$f->returnHandlers();
 
-		$this->assertInstanceOf('FuelPHP\FileSystem\File', $f->findFile('a'));
+		$this->assertInstanceOf('Fuel\FileSystem\File', $f->findFile('a'));
 
 		$f = new Finder;
 		$f->addPath(__DIR__.'/../resources/one');
 		$f->addPath(__DIR__.'/../resources');
 		$f->asHandlers();
-		$this->assertInstanceOf('FuelPHP\FileSystem\File', $f->findFile('a'));
+		$this->assertInstanceOf('Fuel\FileSystem\File', $f->findFile('a'));
 		$f->asHandlers();
-		$this->assertInstanceOf('FuelPHP\FileSystem\Directory', $f->findDir('one'));
+		$this->assertInstanceOf('Fuel\FileSystem\Directory', $f->findDir('one'));
 		$f->returnHandlers();
-		$this->assertContainsOnlyInstancesOf('FuelPHP\FileSystem\File', $f->findAllFiles('a'));
-		$this->assertContainsOnlyInstancesOf('FuelPHP\FileSystem\Directory', $f->findAllDirs('one'));
+		$this->assertContainsOnlyInstancesOf('Fuel\FileSystem\File', $f->findAllFiles('a'));
+		$this->assertContainsOnlyInstancesOf('Fuel\FileSystem\Directory', $f->findAllDirs('one'));
 	}
 }

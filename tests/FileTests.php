@@ -1,6 +1,6 @@
 <?php
 
-use FuelPHP\FileSystem\File;
+use Fuel\FileSystem\File;
 
 class FileTests extends PHPUnit_Framework_TestCase
 {
