@@ -10,6 +10,11 @@
 			"email": "team@fuelphp.com"
 		}
 	],
+	"autoload": {
+		"psr-0": {
+			"Fuel\\FileSystem": "src"
+		}
+	},
 	"require": {
 		"php": ">=5.4"
 	},
