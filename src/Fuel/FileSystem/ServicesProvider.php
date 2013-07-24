@@ -33,7 +33,7 @@ class ServicesProvider extends ServiceProvider
 	 */
 	public function provide()
 	{
-		// \Fuel\Display\ViewManager
+		// \Fuel\FileSystem\Finder
 		$this->register('finder', function ($dic, array $paths = null, $defaultExtension = null, $root = null)
 		{
 			return new Finder($paths, $defaultExtension, $root);
