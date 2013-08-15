@@ -8,20 +8,18 @@
  * @link       http://fuelphp.com
  */
 
-namespace Fuel\FileSystem;
+namespace Fuel\FileSystem\Providers;
 
 use Fuel\Dependency\ServiceProvider;
 
 /**
- * ServicesProvider class
- *
- * Defines the services published by this namespace to the DiC
+ * FuelPHP ServiceProvider class for this package
  *
  * @package  Fuel\FileSystem
  *
  * @since  1.0.0
  */
-class ServicesProvider extends ServiceProvider
+class FuelServiceProvider extends ServiceProvider
 {
 	/**
 	 * @var  array  list of service names provided by this provider
@@ -36,7 +34,7 @@ class ServicesProvider extends ServiceProvider
 		// \Fuel\FileSystem\Finder
 		$this->register('finder', function ($dic, array $paths = null, $defaultExtension = null, $root = null)
 		{
-			return new Finder($paths, $defaultExtension, $root);
+			return $dic->resolve('Fuel\FileSystem\Finder', array($paths, $defaultExtension, $root));
 		});
 	}
 }
