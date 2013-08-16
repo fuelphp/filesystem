@@ -32,7 +32,7 @@ class FuelServiceProvider extends ServiceProvider
 	public function provide()
 	{
 		// \Fuel\FileSystem\Finder
-		$this->register('finder', function ($dic, array $paths = null, $defaultExtension = null, $root = null)
+		$this->register('finder', function ($dic, Array $paths = null, $defaultExtension = null, $root = null)
 		{
 			return $dic->resolve('Fuel\FileSystem\Finder', array($paths, $defaultExtension, $root));
 		});
