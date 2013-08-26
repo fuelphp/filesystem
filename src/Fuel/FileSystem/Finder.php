@@ -229,8 +229,8 @@ class Finder
 	 */
 	public function normalizePath($path)
 	{
-		$path = rtrim($path, '/\\').'/';
-		$path = realpath($path).'/';
+		$path = rtrim($path, '/\\').DIRECTORY_SEPARATOR;
+		$path = realpath($path).DIRECTORY_SEPARATOR;
 
 		if ($this->root and strpos($path, $this->root) !== 0)
 		{
@@ -294,7 +294,7 @@ class Finder
 	 */
 	public function findAll($name, $reload = false, $reversed = false, $type = 'all')
 	{
-		$name = trim($name, '/');
+		$name = trim($name, '\\/');
 		$scope = 'all::'.$type;
 		$asHandlers = $this->returnHandlers;
 		$group = '__DEFAULT__';
@@ -418,7 +418,7 @@ class Finder
 	 */
 	public function find($name, $reload = false, $reversed = false, $type = 'all')
 	{
-		$name = trim($name, '/');
+		$name = trim($name, '\\/');
 		$scope = 'one::'.$type;
 		$asHandlers = $this->returnHandlers;
 		$query = $name;
