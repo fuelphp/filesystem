@@ -11,8 +11,8 @@
 		}
 	],
 	"autoload": {
-		"psr-0": {
-			"Fuel\\FileSystem": "src"
+		"psr-4": {
+			"Fuel\\FileSystem\\": "src"
 		}
 	},
 	"require": {
@@ -20,6 +20,5 @@
 	},
 	"require-dev": {
 		"mockery/mockery": "0.7.*"
-	},
-	"minimum-stability": "dev"
+	}
 }
