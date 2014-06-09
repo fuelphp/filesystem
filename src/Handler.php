@@ -195,6 +195,6 @@ abstract class Handler
 	 */
 	public function __toString()
 	{
-		return $this->path;
+		return $this->getPath();
 	}
 }
