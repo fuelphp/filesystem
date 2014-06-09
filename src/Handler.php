@@ -179,12 +179,22 @@ abstract class Handler
 	}
 
 	/**
+	 * Retrieve the path
+	 *
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}
+
+	/**
 	 * Convert to path
 	 *
 	 * @return  string  path name
 	 */
 	public function __toString()
 	{
-		return $this->path;
+		return $this->getPath();
 	}
 }
