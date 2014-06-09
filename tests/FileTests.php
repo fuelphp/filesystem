@@ -6,8 +6,10 @@ class FileTests extends PHPUnit_Framework_TestCase
 {
 	public function testFile()
 	{
-		$file = new File(__DIR__.'/../resources/one/a.php');
+		$path = __DIR__.'/../resources/one/a.php';
+		$file = new File($path);
 		$newContent = time();
+		$this->assertEquals($path, $file->getPath());
 		$file->update($newContent);
 		$this->assertEquals($newContent, $file->getContents());
 		$file->append(' appended');
