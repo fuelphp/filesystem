@@ -1,12 +1,25 @@
 <?php
 
-use Fuel\FileSystem\Finder;
+namespace Fuel\FileSystem;
 
-class FinderTests extends PHPUnit_Framework_TestCase
+use Codeception\TestCase\Test;
+
+class FinderTest extends Test
 {
+
 	public function testFindFile()
 	{
 		$base = realpath(__DIR__.'/../resources/');
+
+		// TODO: Convert these tests to use vfs once that's hhvm compatible
+		$baseFiles = array(
+			'a' => $base.DIRECTORY_SEPARATOR.'one'.DIRECTORY_SEPARATOR.'a.php',
+			'1a' => $base.DIRECTORY_SEPARATOR.'one'.DIRECTORY_SEPARATOR.'a.php',
+			'2a.txt' => $base.DIRECTORY_SEPARATOR.'two'.DIRECTORY_SEPARATOR.'a.txt',
+			'3a' => $base.DIRECTORY_SEPARATOR.'three'.DIRECTORY_SEPARATOR.'a.php',
+			'3a.txt' => $base.DIRECTORY_SEPARATOR.'three'.DIRECTORY_SEPARATOR.'a.txt',
+		);
+
 		$finder = new Finder();
 		$this->assertEquals(array(), $finder->getPaths());
 		$finder->setPaths(array($base.'/one'));
@@ -16,14 +29,17 @@ class FinderTests extends PHPUnit_Framework_TestCase
 
 		$this->assertNull($finder->findFile('null'));
 
-		$this->assertEquals($base.'/one/a.php', $finder->findFile('a'));
+		$this->assertEquals(
+			$baseFiles['a'],
+			$finder->findFile('a')
+		);
 
 		$this->assertEquals(array(
-			$base.'/one/a.php'
+			$baseFiles['a']
 		), $finder->findAllFiles('a'));
 
 		$this->assertEquals(array(
-			$base.'/one/a.php'
+			$baseFiles['a']
 		), $finder->findAllFiles('a'));
 
 		$finder->addPaths(array(
@@ -32,23 +48,23 @@ class FinderTests extends PHPUnit_Framework_TestCase
 		));
 
 		$this->assertEquals(array(
-			$base.'/three/a.php',
-			$base.'/one/a.php',
+			$baseFiles['3a'],
+			$baseFiles['1a'],
 		), $finder->findAllFilesReversed('a'));
 
-		$this->assertEquals($base.'/three/a.php', $finder->findFileReversed('a'));
-		$this->assertEquals($base.'/three/a.txt', $finder->findFileReversed('a.txt'));
+		$this->assertEquals($baseFiles['3a'], $finder->findFileReversed('a'));
+		$this->assertEquals($baseFiles['3a.txt'], $finder->findFileReversed('a.txt'));
 
 		$finder->setDefaultExtension('txt');
 		$finder->clearCache();
 		$this->assertEquals(array(
-			$base.'/two/a.txt',
-			$base.'/three/a.txt',
+			$baseFiles['2a.txt'],
+			$baseFiles['3a.txt'],
 		), $finder->findAllFiles('a'));
 
 		$this->assertEquals(array(
-			$base.'/three/a.txt',
-			$base.'/two/a.txt',
+			$baseFiles['3a.txt'],
+			$baseFiles['2a.txt'],
 		), $finder->findAllReversed('a'));
 
 		$finder->asHandlers();
@@ -60,18 +76,18 @@ class FinderTests extends PHPUnit_Framework_TestCase
 		$finder->removePath(__DIR__.'/../resources');
 
 		$this->assertEquals(array(
-			$base.'/one/',
-			$base.'/two/',
-			$base.'/three/',
+			$base.DIRECTORY_SEPARATOR.'one'.DIRECTORY_SEPARATOR,
+			$base.DIRECTORY_SEPARATOR.'two'.DIRECTORY_SEPARATOR,
+			$base.DIRECTORY_SEPARATOR.'three'.DIRECTORY_SEPARATOR,
 		), $finder->getPaths());
 
-		$this->assertEquals($base.'/one/a.php', $finder->findFile('a.php'));
-		$this->assertEquals($base.'/one/a.php', $finder->findFile('a.php'));
+		$this->assertEquals($baseFiles['1a'], $finder->findFile('a.php'));
+		$this->assertEquals($baseFiles['1a'], $finder->findFile('a.php'));
 		$finder->removePaths(array($base.'/one'));
-		$this->assertEquals($base.'/three/a.php', $finder->findFile('a.php'));
+		$this->assertEquals($baseFiles['3a'], $finder->findFile('a.php'));
 
 		$finder->addPath(__DIR__.'/../resources/');
-		$expected = $base.'/one';
+		$expected = $base.DIRECTORY_SEPARATOR.'one';
 		$this->assertEquals($expected, $finder->findDir('one'));
 		$this->assertEquals($expected, $finder->findDirReversed('one'));
 		$this->assertEquals(array($expected), $finder->findAllDirs('one'));
@@ -89,7 +105,7 @@ class FinderTests extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @expectedException  Exception
+	 * @expectedException \Exception
 	 */
 	public function testRoot()
 	{
@@ -101,7 +117,7 @@ class FinderTests extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @expectedException  Exception
+	 * @expectedException \Exception
 	 */
 	public function testInvalidRoot()
 	{
@@ -128,4 +144,5 @@ class FinderTests extends PHPUnit_Framework_TestCase
 		$this->assertContainsOnlyInstancesOf('Fuel\FileSystem\File', $f->findAllFiles('a'));
 		$this->assertContainsOnlyInstancesOf('Fuel\FileSystem\Directory', $f->findAllDirs('one'));
 	}
+
 }

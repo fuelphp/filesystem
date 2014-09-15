@@ -1,9 +1,12 @@
 <?php
 
-use Fuel\FileSystem\File;
+namespace Fuel\FileSystem;
 
-class FileTests extends PHPUnit_Framework_TestCase
+use Codeception\TestCase\Test;
+
+class FileTest extends Test
 {
+
 	public function testFile()
 	{
 		$path = __DIR__.'/../resources/one/a.php';
@@ -34,4 +37,5 @@ class FileTests extends PHPUnit_Framework_TestCase
 		$this->assertInternalType('int', $file->getAccessTime());
 		$this->assertInternalType('int', $file->getModifiedTime());
 	}
+
 }
