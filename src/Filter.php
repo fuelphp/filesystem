@@ -4,7 +4,7 @@
  * @version    2.0
  * @author     Fuel Development Team
  * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
+ * @copyright  2010 - 2015 Fuel Development Team
  * @link       http://fuelphp.com
  */
 
@@ -13,21 +13,22 @@ namespace Fuel\FileSystem;
 class Filter
 {
 	/**
-	 * @var  array  $typeCache  cache for file types
+	 * @var array
 	 */
-	protected $typeCache = array();
+	protected $typeCache = [];
 
 	/**
-	 * @var  array  $filters  filters
+	 * @var array
 	 */
-	protected $filters = array();
+	protected $filters = [];
 
 	/**
-	 * Check wether an path is of the correct type, dir or file.
+	 * Checks wether an path is of the correct type, dir or file
 	 *
-	 * @param   string   $type  desired type
-	 * @param   string   $path  path to a file
-	 * @return  boolean  wether the path is of the correct type
+	 * @param string $type
+	 * @param string $path
+	 *
+	 * @return boolean
 	 */
 	public function isCorrectType($type, $path)
 	{
@@ -45,10 +46,11 @@ class Filter
 	}
 
 	/**
-	 * Filter a batch of filesystem entries.
+	 * Filters a batch of filesystem entries
 	 *
-	 * @param   array  $contents  entries to filter
-	 * @return  array  filtered contents
+	 * @param array $contents
+	 *
+	 * @return array
 	 */
 	public function filter(array $contents)
 	{
@@ -79,11 +81,11 @@ class Filter
 	}
 
 	/**
-	 * Add a filter
+	 * Adds a filter
 	 *
-	 * @param   string   $filter    regex expression
-	 * @param   boolean  $expected  expected result
-	 * @param   string   $type      file, dir or null for all
+	 * @param string  $filter
+	 * @param boolean $expected
+	 * @param string  $type
 	 */
 	public function addFilter($filter, $expected = true, $type = null)
 	{
@@ -94,59 +96,53 @@ class Filter
 			'expected' => $expected,
 			'type' => $type,
 		);
-
-		return $this;
 	}
 
 	/**
-	 * Ensure an extension
+	 * Ensures an extension
 	 *
-	 * @param   string  $extension  file extension
-	 * @return  $this
+	 * @param string $extension
 	 */
 	public function hasExtension($extension)
 	{
 		$filter = '\\.['.ltrim($extension, '.').']$';
 
-		return $this->addFilter($filter, true, 'file');
+		$this->addFilter($filter, true, 'file');
 	}
 
 	/**
-	 * Block by extension
+	 * Blocks by extension
 	 *
-	 * @param   string  $extension  file extension
-	 * @return  $this
+	 * @param string $extension
 	 */
 	public function blockExtension($extension)
 	{
 		$filter = '\\.['.ltrim($extension, '.').']$';
 
-		return $this->addFilter($filter, false, 'file');
+		$this->addFilter($filter, false, 'file');
 	}
 
 	/**
-	 * Block hidden files
+	 * Blocks hidden files
 	 *
-	 * @param   string  $type  file, dir or null for both
-	 * @return  $this
+	 * @param string $type
 	 */
 	public function blockHidden($type = null)
 	{
 		$filter = '^\\.';
 
-		return $this->addFilter($filter, false, $type);
+		$this->addFilter($filter, false, $type);
 	}
 
 	/**
-	 * Allow only hidden files
+	 * Allows only hidden files
 	 *
-	 * @param   string  $type  file, dir or null for both
-	 * @return  $this
+	 * @param string $type
 	 */
 	public function isHidden($type = null)
 	{
 		$filter = '^\\.';
 
-		return $this->addFilter($filter, true, $type);
+		$this->addFilter($filter, true, $type);
 	}
 }

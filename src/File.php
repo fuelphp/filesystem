@@ -4,7 +4,7 @@
  * @version    2.0
  * @author     Fuel Development Team
  * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
+ * @copyright  2010 - 2015 Fuel Development Team
  * @link       http://fuelphp.com
  */
 
@@ -13,9 +13,9 @@ namespace Fuel\FileSystem;
 class File extends Handler
 {
 	/**
-	 * Get the files contents
+	 * Returns the files contents
 	 *
-	 * @return  string  file contents
+	 * @return string
 	 */
 	public function getContents()
 	{
@@ -23,10 +23,11 @@ class File extends Handler
 	}
 
 	/**
-	 * Append data to a file
+	 * Appends data to a file
 	 *
-	 * @param   string   $data  data to append
-	 * @return  boolean  wether the data was appended
+	 * @param string $data
+	 *
+	 * @return boolean
 	 */
 	public function append($data)
 	{
@@ -36,10 +37,11 @@ class File extends Handler
 	}
 
 	/**
-	 * Update a file
+	 * Updates a file
 	 *
-	 * @param   string   $data  new data
-	 * @return  boolean  wether the file was updated
+	 * @param string $data
+	 *
+	 * @return boolean
 	 */
 	public function update($data)
 	{
@@ -49,10 +51,11 @@ class File extends Handler
 	}
 
 	/**
-	 * Copy a file
+	 * Copies a file
 	 *
-	 * @param   string   $destination  new location
-	 * @return  boolean  wether the file was copied
+	 * @param string $destination
+	 *
+	 * @return boolean
 	 */
 	public function copyTo($destination)
 	{
@@ -60,10 +63,11 @@ class File extends Handler
 	}
 
 	/**
-	 * get the files size
+	 * Returns the file size
 	 *
-	 * @param   string   $destination  new location
-	 * @return  boolean  wether the file was copied
+	 * @param string $destination
+	 *
+	 * @return boolean
 	 */
 	public function getSize()
 	{
@@ -71,9 +75,9 @@ class File extends Handler
 	}
 
 	/**
-	 * Get the mime-type
+	 * Returns the mime-type
 	 *
-	 * @return  string  file's mime-type
+	 * @return string
 	 */
 	public function getMimeType()
 	{

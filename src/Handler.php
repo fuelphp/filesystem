@@ -4,7 +4,7 @@
  * @version    2.0
  * @author     Fuel Development Team
  * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
+ * @copyright  2010 - 2015 Fuel Development Team
  * @link       http://fuelphp.com
  */
 
@@ -13,14 +13,12 @@ namespace Fuel\FileSystem;
 abstract class Handler
 {
 	/**
-	 * @var  string  $path  path
+	 * @var string
 	 */
 	protected $path;
 
 	/**
-	 * Constructor
-	 *
-	 * @param  string  $path  path
+	 * @param string $path
 	 */
 	public function __construct($path)
 	{
@@ -28,9 +26,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Check wether a file/dir exists
+	 * Checks whether a file/dir exists
 	 *
-	 * @return  boolean  wether the file/dir exists
+	 * @return boolean
 	 */
 	public function exists()
 	{
@@ -38,9 +36,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Delete a file/dir
+	 * Deletes a file/dir
 	 *
-	 * @return  boolean  wether the file/dir was deleted
+	 * @return boolean
 	 */
 	public function delete()
 	{
@@ -48,9 +46,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Move a file/dir
+	 * Moves a file/dir
 	 *
-	 * @return  boolean  wether the file/dir was moved
+	 * @return boolean
 	 */
 	public function moveTo($destination)
 	{
@@ -58,9 +56,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Rename a file/dir
+	 * Renames a file/dir
 	 *
-	 * @return  boolean  wether the file/dir was renamed
+	 * @return boolean
 	 */
 	public function renameTo($name)
 	{
@@ -83,9 +81,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Create a symlink to a file/dir
+	 * Creates a symlink to a file/dir
 	 *
-	 * @return  boolean  wether the symlink was created
+	 * @return boolean
 	 */
 	public function symlinkTo($destination)
 	{
@@ -93,9 +91,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Check wether a file/dir is writable
+	 * Checks wether a file/dir is writable
 	 *
-	 * @return  boolean  wether a file/dir is writable
+	 * @return boolean
 	 */
 	public function isWritable()
 	{
@@ -103,9 +101,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Check wether a file/dir is readable
+	 * Checks wether a file/dir is readable
 	 *
-	 * @return  boolean  wether a file/dir is readable
+	 * @return boolean
 	 */
 	public function isReadable()
 	{
@@ -113,9 +111,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Retrieve wether the path is a file or a dir
+	 * Retrieves wether the path is a file or a dir
 	 *
-	 * @return  string  wether the path is a file or a dir
+	 * @return string
 	 */
 	public function getType()
 	{
@@ -123,9 +121,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Retrieve the last access time
+	 * Retrieves the last access time
 	 *
-	 * @return  int  last access time
+	 * @return integer
 	 */
 	public function getAccessTime()
 	{
@@ -133,9 +131,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Retrieve the last modified time
+	 * Retrieves the last modified time
 	 *
-	 * @return  int  last modified time
+	 * @return integer
 	 */
 	public function getModifiedTime()
 	{
@@ -143,9 +141,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Retrieve the created time
+	 * Retrieves the created time
 	 *
-	 * @return  int  created time
+	 * @return integer
 	 */
 	public function getCreatedTime()
 	{
@@ -153,9 +151,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Retrieve the permissions
+	 * Retrieves the permissions
 	 *
-	 * @return  int  permissions
+	 * @return integer
 	 */
 	public function getPermissions()
 	{
@@ -163,9 +161,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Set the permissions
+	 * Sets the permissions
 	 *
-	 * @return  boolean  wether the permissions were set
+	 * @return boolean
 	 */
 	public function setPermissions($permissions)
 	{
@@ -179,7 +177,7 @@ abstract class Handler
 	}
 
 	/**
-	 * Retrieve the path
+	 * Retrieves the path
 	 *
 	 * @return string
 	 */
@@ -189,9 +187,9 @@ abstract class Handler
 	}
 
 	/**
-	 * Convert to path
+	 * Converts to path
 	 *
-	 * @return  string  path name
+	 * @return string
 	 */
 	public function __toString()
 	{

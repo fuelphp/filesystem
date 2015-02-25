@@ -4,48 +4,45 @@
  * @version    2.0
  * @author     Fuel Development Team
  * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
+ * @copyright  2010 - 2015 Fuel Development Team
  * @link       http://fuelphp.com
  */
 
 namespace Fuel\FileSystem;
 
 use Closure;
-use Exception;
 
 class Finder
 {
 	/**
-	 * @var  string  $defaultExtension  default extension
+	 * @var string
 	 */
 	protected $defaultExtension = 'php';
 
 	/**
-	 * @var  array  $paths  paths to look in
+	 * @var array
 	 */
-	protected $paths = array();
+	protected $paths = [];
 
 	/**
-	 * @var  string  $root  root restriction
+	 * @var string
 	 */
 	protected $root;
 
 	/**
-	 * @var  boolean  $returnHandlers  wether to return handlers
+	 * @var boolean
 	 */
 	protected $returnHandlers = false;
 
 	/**
-	 * @var  null|boolean  $nextAsHandlers  wether to fetch the next result as handler objects
+	 * @var null|boolean
 	 */
 	protected $nextAsHandlers = null;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param  array   $path  paths
-	 * @param  string  $defaultExtension  default file extension
-	 * @param  string  $root              root restriction
+	 * @param array  $path
+	 * @param string $defaultExtension
+	 * @param string $root
 	 */
 	public function __construct(array $paths = null, $defaultExtension = null, $root = null)
 	{
@@ -63,66 +60,39 @@ class Finder
 	}
 
 	/**
-	 * Wether to return handlers.
+	 * Wether to return handlers
 	 *
-	 * @param   boolean  $returnHandlers  wether to return handlers
-	 * @return  $this
+	 * @param boolean $returnHandlers
 	 */
 	public function returnHandlers($returnHandlers = true)
 	{
 		$this->returnHandlers = $returnHandlers;
-
-		return $this;
 	}
 
 	/**
-	 * Wether to let the next find result return handlers.
+	 * Wether to let the next find result return handlers
 	 *
-	 * @param   boolean  $returnHandlers  wether to return handlers
-	 * @return  $this
+	 * @param boolean $returnHandlers
 	 */
 	public function asHandlers($returnHandlers = true)
 	{
 		$this->nextAsHandlers = $returnHandlers;
-
-		return $this;
 	}
 
 	/**
-	 * Wether to let the next find result return a handler.
+	 * Wether to let the next find result return a handler
 	 *
-	 * @param   boolean  $returnHandler  wether to return handlers
-	 * @return  $this
+	 * @param boolean $returnHandler
 	 */
 	public function asHandler($returnHandler = true)
 	{
 		$this->nextAsHandlers = $returnHandler;
-
-		return $this;
 	}
 
 	/**
-	 * Set a root restriction
+	 * Returns the root
 	 *
-	 * @param   string  $root  root restriction
-	 * @return  $this
-	 */
-	public function setRoot($root)
-	{
-		if ( ! $path = realpath($root))
-		{
-			throw new Exception('Location does not exist: '.$root);
-		}
-
-		$this->root = $path;
-
-		return $this;
-	}
-
-	/**
-	 * Get the root
-	 *
-	 * @return  string  root path
+	 * @return string
 	 */
 	public function getRoot()
 	{
@@ -130,26 +100,36 @@ class Finder
 	}
 
 	/**
-	 * Adds paths to look in.
+	 * Sets a root restriction
 	 *
-	 * @param   array  $paths  paths
-	 * @param   boolean  $clearCache  wether to clear the cache
-	 * @return  $this
+	 * @param string $root
 	 */
-	public function addPaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
+	public function setRoot($root)
 	{
-		//var_dump(func_get_args());
-		array_map(array($this, 'addPath'), $paths, array(array($clearCache, $group)));
+		if ( ! $path = realpath($root))
+		{
+			throw new \Exception('Location does not exist: '.$root);
+		}
 
-		return $this;
+		$this->root = $path;
 	}
 
 	/**
-	 * Add a path
+	 * Adds paths to look in
 	 *
-	 * @param   string   $path        path
-	 * @param   boolean  $clearCache  wether to clear the cache
-	 * @return  $this
+	 * @param array $paths
+	 * @param boolean $clearCache
+	 */
+	public function addPaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
+	{
+		array_map([$this, 'addPath'], $paths, [[$clearCache, $group]]);
+	}
+
+	/**
+	 * Adds a path
+	 *
+	 * @param string  $path
+	 * @param boolean $clearCache
 	 */
 	public function addPath($path, $clearCache = true, $group = '__DEFAULT__')
 	{
@@ -162,30 +142,24 @@ class Finder
 
 		if ($clearCache)
 		{
-			$this->cache = array();
+			$this->cache = [];
 		}
-
-		return $this;
 	}
 
 	/**
-	 * Remove paths to look in
+	 * Removes paths to look in
 	 *
-	 * @param   array  $paths  paths to remove
-	 * @return  $this
+	 * @param array $paths
 	 */
 	public function removePaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
 	{
-		array_map(array($this, 'removePath'), $paths, array(array($clearCache, $group)));
-
-		return $this;
+		array_map([$this, 'removePath'], $paths, [[$clearCache, $group]]);
 	}
 
 	/**
-	 * Remove a path
+	 * Removes a path
 	 *
-	 * @param   string  $path  path
-	 * @return  $this
+	 * @param string $path
 	 */
 	public function removePath($path, $clearCache = true, $group = '__DEFAULT__')
 	{
@@ -197,15 +171,12 @@ class Finder
 
 			if ($clearCache) $this->removePathCache($path);
 		}
-
-		return $this;
 	}
 
 	/**
-	 * Remove path cache
+	 * Removes path cache
 	 *
-	 * @param   string  $path  path
-	 * @return  $this
+	 * @param string $path
 	 */
 	public function removePathCache($path)
 	{
@@ -216,16 +187,16 @@ class Finder
 				unset($this->cache[$key]);
 			}
 		}
-
-		return $this;
 	}
 
 	/**
-	 * Normalize a path
+	 * Normalizes a path
 	 *
-	 * @param   string  $path  path
-	 * @return  string  normalized path
-	 * @throws  Exception
+	 * @param string $path
+	 *
+	 * @return string
+	 *
+	 * @throws \Exception
 	 */
 	public function normalizePath($path)
 	{
@@ -234,31 +205,31 @@ class Finder
 
 		if ($this->root and strpos($path, $this->root) !== 0)
 		{
-			throw new Exception('Cannot access path outside: '.$this->root.'. Trying to access: '.$path);
+			throw new \Exception('Cannot access path outside: '.$this->root.'. Trying to access: '.$path);
 		}
 
 		return $path;
 	}
 
 	/**
-	 * Get the paths set up to look in.
+	 * Returns the paths set up to look in
 	 *
-	 * @return  array  paths array
+	 * @return array
 	 */
 	public function getPaths($group = '__DEFAULT__')
 	{
 		if ( ! isset($this->paths[$group]))
 		{
-			return array();
+			return [];
 		}
 
 		return array_values($this->paths[$group]);
 	}
 
 	/**
-	 * Retrieve the path groups.
+	 * Retrieves the path groups
 	 *
-	 * @return  array  path groups
+	 * @return array
 	 */
 	public function getGroups()
 	{
@@ -266,31 +237,28 @@ class Finder
 	}
 
 	/**
-	 * Replace all the paths
+	 * Replaces all the paths
 	 *
-	 * @param   array  $paths  paths
-	 * @return  $this
+	 * @param array $paths
 	 */
 	public function setPaths(array $paths, $clearCache = true, $group = '__DEFAULT__')
 	{
-		$this->paths[$group] = array();
+		$this->paths[$group] = [];
 		$this->addPaths($paths, false, $group);
 
 		if ($clearCache)
 		{
-			$this->cache = array();
+			$this->cache = [];
 		}
-
-		return $this;
 	}
 
 	/**
-	 * Find all files with a given name/subpath.
+	 * Finds all files with a given name/subpath.
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
-	 * @param   string   $type      dir, file or all
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
+	 * @param string  $type
 	 */
 	public function findAll($name, $reload = false, $reversed = false, $type = 'all')
 	{
@@ -313,7 +281,7 @@ class Finder
 
 		if ( ! isset($this->paths[$group]))
 		{
-			return array();
+			return [];
 		}
 
 		if ($type !== 'dir')
@@ -326,8 +294,8 @@ class Finder
 			return $cached;
 		}
 
-		$used = array();
-		$found = array();
+		$used = [];
+		$found = [];
 		$paths = $reversed ? array_reverse($this->paths[$group]) : $this->paths[$group];
 
 		foreach ($paths as $path)
@@ -351,11 +319,11 @@ class Finder
 	}
 
 	/**
-	 * Find all files with a given name/subpath.
+	 * Finds all files with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
 	 */
 	public function findAllFiles($name, $reload = false, $reversed = false)
 	{
@@ -363,11 +331,11 @@ class Finder
 	}
 
 	/**
-	 * Find all directories with a given name/subpath.
+	 * Finds all directories with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
 	 */
 	public function findAllDirs($name, $reload = false, $reversed = false)
 	{
@@ -375,11 +343,11 @@ class Finder
 	}
 
 	/**
-	 * Reverse-find all files and directories with a given name/subpath.
+	 * Reverse-finds all files and directories with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   string   $type      dir, file or all
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param string  $type
 	 */
 	public function findAllReversed($name, $reload = false, $type = 'all')
 	{
@@ -387,10 +355,10 @@ class Finder
 	}
 
 	/**
-	 * Reverse-find all directories with a given name/subpath.
+	 * Reverse-finds all directories with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
+	 * @param string  $name
+	 * @param boolean $reload
 	 */
 	public function findAllDirsReversed($name, $reload = false)
 	{
@@ -398,10 +366,10 @@ class Finder
 	}
 
 	/**
-	 * Reverse-find all files with a given name/subpath.
+	 * Reverse-finds all files with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
+	 * @param string  $name
+	 * @param boolean $reload
 	 */
 	public function findAllFilesReversed($name, $reload = false)
 	{
@@ -409,12 +377,12 @@ class Finder
 	}
 
 	/**
-	 * Find one file or directories with a given name/subpath.
+	 * Finds one file or directories with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
-	 * @param   string   $type      dir, file or all
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
+	 * @param string  $type
 	 */
 	public function find($name, $reload = false, $reversed = false, $type = 'all')
 	{
@@ -486,18 +454,18 @@ class Finder
 		if (isset($found))
 		{
 			// Store the paths in cache
-			$this->cache($scope, $name, $reversed, $found, array($path));
+			$this->cache($scope, $name, $reversed, $found, [$path]);
 
 			return $found;
 		}
 	}
 
 	/**
-	 * Find one file with a given name/subpath.
+	 * Finds one file with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
 	 */
 	public function findFile($name, $reload = false, $reversed = false)
 	{
@@ -505,11 +473,11 @@ class Finder
 	}
 
 	/**
-	 * Find one directories with a given name/subpath.
+	 * Finds one directories with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
 	 */
 	public function findDir($name, $reload = false, $reversed = false)
 	{
@@ -517,12 +485,12 @@ class Finder
 	}
 
 	/**
-	 * Reverse-find one file or directory with a given name/subpath.
+	 * Reverse-finds one file or directory with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
-	 * @param   string   $type      dir, file or all
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
+	 * @param string  $type
 	 */
 	public function findReversed($name, $reload = false, $type = 'all')
 	{
@@ -530,11 +498,11 @@ class Finder
 	}
 
 	/**
-	 * Reverse-find one file with a given name/subpath.
+	 * Reverse-finds one file with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
 	 */
 	public function findFileReversed($name, $reload = false)
 	{
@@ -542,11 +510,11 @@ class Finder
 	}
 
 	/**
-	 * Reverse-find one directory with a given name/subpath.
+	 * Reverse-finds one directory with a given name/subpath
 	 *
-	 * @param   string   $name      file name
-	 * @param   boolean  $reload    wether to bypass cache
-	 * @param   boolean  $reversed  wether to search reversed
+	 * @param string  $name
+	 * @param boolean $reload
+	 * @param boolean $reversed
 	 */
 	public function findDirReversed($name, $reload = false)
 	{
@@ -554,12 +522,13 @@ class Finder
 	}
 
 	/**
-	 * Retrieve a location from cache.
+	 * Retrieves a location from cache
 	 *
-	 * @param   string        $scope     scope [all,one]
-	 * @param   string        $name      file name
-	 * @param   boolean       $reversed  wether the search was reversed
-	 * @return  string|array  cached result
+	 * @param string  $scope
+	 * @param string  $name
+	 * @param boolean $reversed
+	 *
+	 * @return string|array
 	 */
 	public function findCached($scope, $name, $reversed)
 	{
@@ -572,44 +541,38 @@ class Finder
 	}
 
 	/**
-	 * Clear the location cache
-	 *
-	 * @return  $this
+	 * Clears the location cache
 	 */
 	public function clearCache()
 	{
-		$this->cached = array();
-
-		return $this;
+		$this->cached = [];
 	}
 
 	/**
-	 * Cache a find result
+	 * Caches a find result
 	 *
-	 * @param   string   $scope      find scope
-	 * @param   string   $name       file name
-	 * @param   boolean  $reversed   wether it was a reversed search
-	 * @param   array    $pathsUsed  which paths it depended on
-	 * @return  $this
+	 * @param string  $scope
+	 * @param string  $name
+	 * @param boolean $reversed
+	 * @param array   $pathsUsed
 	 */
-	public function cache($scope, $name, $reversed, $result, $pathsUsed = array())
+	public function cache($scope, $name, $reversed, $result, $pathsUsed = [])
 	{
 		$cacheKey = $this->makeCacheKey($scope, $name, $reversed);
-		$this->cache[$cacheKey] = array(
+		$this->cache[$cacheKey] = [
 			'result' => $result,
-			'used' => $pathsUsed
-		);
-
-		return $this;
+			'used'   => $pathsUsed,
+		];
 	}
 
 	/**
-	 * Generate a cache key
+	 * Generates a cache key
 	 *
-	 * @param   string   $scope     find scope
-	 * @param   string   $name      file name
-	 * @param   boolean  $reversed  wether it was a reversed search
-	 * @return  string   cache key
+	 * @param string  $scope
+	 * @param string  $name
+	 * @param boolean $reversed
+	 *
+	 * @return string
 	 */
 	public function makeCacheKey($scope, $name, $reversed)
 	{
@@ -624,10 +587,11 @@ class Finder
 	}
 
 	/**
-	 * Normalize a file name
+	 * Normalizes a file name
 	 *
-	 * @param   string  $name  file name
-	 * @return  string  normalized filename
+	 * @param string $name
+	 *
+	 * @return string
 	 */
 	public function normalizeFileName($name)
 	{
@@ -640,15 +604,12 @@ class Finder
 	}
 
 	/**
-	 * Set the default extension
+	 * Sets the default extension
 	 *
-	 * @param   string  $extension  extension
-	 * @return  $this
+	 * @param string $extension
 	 */
 	public function setDefaultExtension($extension)
 	{
 		$this->defaultExtension = ltrim($extension, '.');
-
-		return $this;
 	}
 }

@@ -4,37 +4,33 @@
  * @version    2.0
  * @author     Fuel Development Team
  * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
+ * @copyright  2010 - 2015 Fuel Development Team
  * @link       http://fuelphp.com
  */
 
 namespace Fuel\FileSystem\Providers;
 
-use Fuel\Dependency\ServiceProvider;
+use Fuel\FileSystem\Finder;
+use League\Container\ServiceProvider;
 
 /**
- * FuelPHP ServiceProvider class for this package
- *
- * @package  Fuel\FileSystem
- *
- * @since  1.0.0
+ * Fuel ServiceProvider class for Filesystem
  */
 class FuelServiceProvider extends ServiceProvider
 {
 	/**
-	 * @var  array  list of service names provided by this provider
+	 * @var array
 	 */
-	public $provides = array('finder');
+	public $provides = ['finder'];
 
 	/**
-	 * Service provider definitions
+	 * {@inheritdoc}
 	 */
-	public function provide()
+	public function register()
 	{
-		// \Fuel\FileSystem\Finder
-		$this->register('finder', function ($dic, Array $paths = null, $defaultExtension = null, $root = null)
+		$this->container->add('finder', function (array $paths = null, $defaultExtension = null, $root = null)
 		{
-			return $dic->resolve('Fuel\FileSystem\Finder', array($paths, $defaultExtension, $root));
+			return new Finder($paths, $defaultExtension, $root);
 		});
 	}
 }

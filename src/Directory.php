@@ -4,20 +4,19 @@
  * @version    2.0
  * @author     Fuel Development Team
  * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
+ * @copyright  2010 - 2015 Fuel Development Team
  * @link       http://fuelphp.com
  */
 
 namespace Fuel\FileSystem;
 
-use Closure;
 
 class Directory extends Handler
 {
 	/**
-	 * Delete a directory recursively
+	 * Deletes a directory recursively
 	 *
-	 * @return  boolean  wether the directory was deleted
+	 * @return boolean
 	 */
 	public function deleteRecursive()
 	{
@@ -25,10 +24,11 @@ class Directory extends Handler
 	}
 
 	/**
-	 * Delete a directory
+	 * Deletes a directory
 	 *
-	 * @param   boolean  $recursive  wether to delete it's contents too
-	 * @return  boolean  wether the directory was deleted
+	 * @param boolean $recursive
+	 *
+	 * @return boolean
 	 */
 	public function delete($recursive = false)
 	{
@@ -49,12 +49,13 @@ class Directory extends Handler
 	}
 
 	/**
-	 * List all files in a directory
+	 * Lists all files in a directory
 	 *
-	 * @param   int      $depth        depth
-	 * @param   mixed    $filter       filter
-	 * @param   boolean  $asHandlers    return handlers or plain formatted
-	 * @return  array    directory contents
+	 * @param integer $depth
+	 * @param mixed   $filter
+	 * @param boolean $asHandlers
+	 *
+	 * @return array
 	 */
 	public function listFiles($depth = 0, $filter = null, $asHandlers = false)
 	{
@@ -62,11 +63,12 @@ class Directory extends Handler
 	}
 
 	/**
-	 * List all files in a directory
+	 * Lists all files in a directory as Handlers
 	 *
-	 * @param   int      $depth        depth
-	 * @param   mixed    $filter       filter
-	 * @return  array    directory contents
+	 * @param integer $depth
+	 * @param mixed   $filter
+	 *
+	 * @return array
 	 */
 	public function listFileHandlers($depth = 0, $filter = null)
 	{
@@ -74,12 +76,13 @@ class Directory extends Handler
 	}
 
 	/**
-	 * List all directories in a directory
+	 * Lists all directories in a directory
 	 *
-	 * @param   int      $depth        depth
-	 * @param   mixed    $filter       filter
-	 * @param   boolean  $asHandlers    return handlers or plain formatted
-	 * @return  array    directory contents
+	 * @param integer $depth
+	 * @param mixed   $filter
+	 * @param boolean $asHandlers
+	 *
+	 * @return array
 	 */
 	public function listDirs($depth = 0, $filter = null, $asHandlers = false)
 	{
@@ -87,11 +90,12 @@ class Directory extends Handler
 	}
 
 	/**
-	 * List all directories in a directory
+	 * Lists all directories in a directory
 	 *
-	 * @param   int      $depth        depth
-	 * @param   mixed    $filter       filter
-	 * @return  array    directory contents
+	 * @param integer $depth
+	 * @param mixed   $filter
+	 *
+	 * @return array
 	 */
 	public function listDirHandlers($depth = 0, $filter = null)
 	{
@@ -99,13 +103,14 @@ class Directory extends Handler
 	}
 
 	/**
-	 * List all files and directories in a directory
+	 * Lists all files and directories in a directory
 	 *
-	 * @param   int      $depth        depth
-	 * @param   mixed    $filter       filter
-	 * @param   string   $type         file or dir
-	 * @param   boolean  $asHandlers    return handlers or plain formatted
-	 * @return  array    directory contents
+	 * @param integer  $depth
+	 * @param mixed    $filter
+	 * @param string   $type
+	 * @param boolean  $asHandlers
+	 *
+	 * @return array
 	 */
 	public function listContents($depth = 0, $filter = null, $type = 'all', $asHandlers = false)
 	{
@@ -136,7 +141,7 @@ class Directory extends Handler
 			}
 		}
 
-		if ($filter instanceof Closure)
+		if ($filter instanceof \Closure)
 		{
 			$callback = $filter;
 			$filter = new Filter();

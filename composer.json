@@ -1,7 +1,7 @@
 {
 	"name": "fuelphp/filesystem",
-	"type": "library",
-	"description": "File system handling.",
+	"description": "File system handling",
+	"keywords": ["filesystem", "file", "directory"],
 	"homepage": "https://github.com/fuelphp/filesystem",
 	"license": "MIT",
 	"authors": [
@@ -10,16 +10,21 @@
 			"email": "team@fuelphp.com"
 		}
 	],
-	"autoload": {
-		"psr-4": {
-			"Fuel\\FileSystem\\": "src"
-		}
-	},
 	"require": {
 		"php": ">=5.4",
 		"ext-fileinfo": "*"
 	},
 	"require-dev": {
 		"codeception/codeception": "~2.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Fuel\\FileSystem\\": "src"
+		}
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-master": "2.0-dev"
+		}
 	}
 }
